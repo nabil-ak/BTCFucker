@@ -3,6 +3,7 @@
 import json
 import requests
 import time
+import sys
 import threading
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from bitcoinaddress import Wallet
@@ -78,10 +79,13 @@ def sendMessage(message,ID,type=0,wallet=""):
 
     response = webhook.execute()
     
-
-for x in range(3):
-    instance = threading.Thread(target=runInstance, args=(x+1,))
-    instance.start()
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("You need to provide how many threads you want to start!!")
+        exit()
+    for x in range(int(sys.argv[1])):
+        instance = threading.Thread(target=runInstance, args=(x+1,))
+        instance.start()
 
 
 
