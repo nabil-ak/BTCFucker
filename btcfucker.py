@@ -30,7 +30,8 @@ def runInstance(pID,tID):
         if request.status_code != 200:
             print(f"{pID}.{tID} || HTTP Error :{request.status_code} with accesing Blockchain.info\n{request.content}")
             sendMessage(f"HTTP Error {request.status_code}",pID,tID,1)
-            exit()
+            time.sleep(30)
+            continue
 
         response = json.loads(request.content)
         for x in range(addressperRequest):
