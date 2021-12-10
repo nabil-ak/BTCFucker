@@ -5,18 +5,19 @@ import requests
 import time
 import sys
 import threading
+from multiprocessing import Process
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from bitcoinaddress import Wallet
 
 DISCORDWEBHOOK = ""
 
 
-def runInstance(ID):
+def runInstance(pID,tID):
     currentwallets = 0
     addressperRequest = 140
     messageInterval = 120
-    nextMessage = time.time() + messageInterval + ID
-    sendMessage(f"STARTED",ID)
+    nextMessage = time.time() + messageInterval + pID + tID
+    sendMessage(f"STARTED",pID,tID)
     while True:
         wallets = []
         requestAdress = "https://blockchain.info/balance?active="
@@ -27,8 +28,8 @@ def runInstance(ID):
         
         request = requests.get(requestAdress)
         if request.status_code != 200:
-            print(f"{ID} || HTTP Error :{request.status_code} with accesing Blockchain.info\n{request.content}")
-            sendMessage(f"HTTP Error {request.status_code}",ID,1)
+            print(f"{pID}.{tID} || HTTP Error :{request.status_code} with accesing Blockchain.info\n{request.content}")
+            sendMessage(f"HTTP Error {request.status_code}",pID,tID,1)
             exit()
 
         response = json.loads(request.content)
@@ -42,27 +43,27 @@ def runInstance(ID):
                         txt = open("wallets.txt", "a")
                         txt.write("Public: " + public + "\n" + "Private: "+private + "\n" + "Balance: " + balance + "\n\n")
                         txt.close()
-                        print(f"{ID} || Public: "+public)
-                        print(f"{ID} || Private: "+private)
-                        print(f"{ID} || Balance: " + balance)
-                        sendMessage("",ID,2,{"private":private,"public":public,"balance":balance})
+                        print(f"{pID}.{tID} || Public: "+public)
+                        print(f"{pID}.{tID} || Private: "+private)
+                        print(f"{pID}.{tID} || Balance: " + balance)
+                        sendMessage("",pID,tID,2,{"private":private,"public":public,"balance":balance})
                         exit()
 
         currentwallets += addressperRequest
-        print(f"{ID} || Wallets Checked: "+ str(currentwallets))
+        print(f"{pID}.{tID} || Wallets Checked: "+ str(currentwallets))
         if nextMessage <= time.time():
-            sendMessage(f"{currentwallets} addresses checked",ID)
-            nextMessage = time.time() + messageInterval + ID
+            sendMessage(f"{currentwallets} addresses checked",pID,tID)
+            nextMessage = time.time() + messageInterval + pID + tID
 
-def sendMessage(message,ID,type=0,wallet=""):
+def sendMessage(message,pID,tID,type=0,wallet=""):
     webhook = DiscordWebhook(url=DISCORDWEBHOOK,rate_limit_retry=True)
     color = "f2902b"
-    title = f"Thread {ID} | Status"
+    title = f"Thread {pID}.{tID} | Status"
     if type==1:
-        title = f"Thread {ID} | Error"
+        title = f"Thread {pID}.{tID} | Error"
         color = "ff2121"
     elif type == 2:
-        title = f"Thread {ID} | Bitcoins FOUND"
+        title = f"Thread {pID}.{tID} | Bitcoins FOUND"
         color = "4BB543"
    
     embed = DiscordEmbed(title=message, color=color)
@@ -78,13 +79,19 @@ def sendMessage(message,ID,type=0,wallet=""):
     webhook.add_embed(embed)
 
     response = webhook.execute()
+
+def startProcess(pID):
+    for x in range(3):
+        instance = threading.Thread(target=runInstance, args=(pID,x+1,))
+        instance.start()
+
     
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print("You need to provide how many threads you want to start!!")
+        print("You need to provide how many Process you want to start!!")
         exit()
     for x in range(int(sys.argv[1])):
-        instance = threading.Thread(target=runInstance, args=(x+1,))
+        instance = Process(target=startProcess, args=(x+1,))
         instance.start()
 
 
