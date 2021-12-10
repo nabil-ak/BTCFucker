@@ -81,7 +81,7 @@ def sendMessage(message,pID,tID,type=0,wallet=""):
     response = webhook.execute()
 
 def startProcess(pID):
-    for x in range(3):
+    for x in range(2):
         instance = threading.Thread(target=runInstance, args=(pID,x+1,))
         instance.start()
 
