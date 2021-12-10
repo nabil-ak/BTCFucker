@@ -27,7 +27,7 @@ def runInstance(ID):
         
         request = requests.get(requestAdress)
         if request.status_code != 200:
-            print(f"{ID} || HTTP Error :{request.status_code} with accesing Blockchain.info")
+            print(f"{ID} || HTTP Error :{request.status_code} with accesing Blockchain.info\n{request.content}")
             sendMessage(f"HTTP Error {request.status_code}",ID,1)
             exit()
 
