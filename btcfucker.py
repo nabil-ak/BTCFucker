@@ -9,13 +9,12 @@ from multiprocessing import Process
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from bitcoinaddress import Wallet
 
-DISCORDWEBHOOK = ""
-
+settings = json.load(open("settings.json"))
 
 def runInstance(pID,tID):
     currentwallets = 0
-    addressperRequest = 140
-    messageInterval = 120
+    addressperRequest = settings["addressperRequest"]
+    messageInterval = settings["messageInterval"]
     nextMessage = time.time() + messageInterval + pID + tID
     sendMessage(f"STARTED",pID,tID)
     while True:
@@ -57,15 +56,19 @@ def runInstance(pID,tID):
             nextMessage = time.time() + messageInterval + pID + tID
 
 def sendMessage(message,pID,tID,type=0,wallet=""):
-    webhook = DiscordWebhook(url=DISCORDWEBHOOK,rate_limit_retry=True)
-    color = "f2902b"
+    link = settings["log"]
+    color = settings["logColor"]
     title = f"Thread {pID}.{tID} | Status"
     if type==1:
         title = f"Thread {pID}.{tID} | Error"
-        color = "ff2121"
+        link = settings["error"]
+        color = settings["errorColor"]
     elif type == 2:
         title = f"Thread {pID}.{tID} | Bitcoins FOUND"
-        color = "4BB543"
+        link = settings["success"]
+        color = settings["sucessColor"]
+
+    webhook = DiscordWebhook(url=link,rate_limit_retry=True)
    
     embed = DiscordEmbed(title=message, color=color)
     embed.set_author(name=title)

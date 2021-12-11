@@ -1,0 +1,10 @@
+{
+    "log":"Enter Discord Webhook",
+    "error":"Enter Discord-Webhook",
+    "success":"Enter Discord-Webhook",
+    "logColor":"f2902b",
+    "errorColor":"ff2121",
+    "sucessColor":"4BB543",
+    "addressperRequest":140,
+    "messageInterval":120
+}
